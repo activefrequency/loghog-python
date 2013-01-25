@@ -13,6 +13,18 @@ of writing the messages one at a time, rotating and compressing files, deleting 
 
 You can think of LogHog as a very secure and user friendly syslog + logrotate in one package.
 
+## When to use LogHog
+
+There are many situations when LogHog will come in handy. Here are some examples:
+
+ * Your application runs on multiple servers and you want the data in one place
+ * You have a multi-process application and you want every process to write to a single log file
+ * You want to offload your logging to a different server
+ * Your application writes logs
+
+In fact there is almost no reason *not to* use LogHog. It is fast, simple,
+secure, and it stays out of your way.
+
 ## Quickstart
 
 **Step 1**: Install the LogHog server (loghogd). If you are using Ubuntu, run the following:
