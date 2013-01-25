@@ -6,7 +6,7 @@ It implements a drop-in LogHandler for the Python logging framework.
 
 ## Quickstart
 
-**Step 1**: Install the LogHog server (*loghogd*). If you are using Ubuntu, run the following:
+**Step 1**: Install the LogHog server (loghogd). If you are using Ubuntu, run the following:
 
     sudo add-apt-repository ppa:activefrequency/ppa
     sudo apt-get update
