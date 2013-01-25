@@ -12,9 +12,19 @@ from loghog import LoghogHandler
 def setup_logging():
     logger = logging.getLogger()
 
+    # In order to use this example, you must generate a client certificate.
+    # Simply use the loghog-client-cert command on the machine that will 
+    # run loghogd:
+    #
+    #   $ sudo loghog-client-cert `hostname`
+    #
+    # The above will generate a file called `hostname`.pem. Use this file with
+    # your project, along with loghogd-ca.cert to encrypt all traffc between
+    # your application and the server
+
     ssl_info = {
-        'pemfile': os.path.join(curdir, 'conf', 'certs', 'test-client.pem'),
-        'cacert': os.path.join(curdir, 'conf', 'certs', 'loghog-ca.cert'),
+        'pemfile': '/PATH/TO/CLIENT.pem',
+        'cacert': '/etc/loghogd/certs/loghogd-ca.cert',
     }
 
     handler = LoghogHandler('kitchen-sink-app',
