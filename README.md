@@ -4,6 +4,15 @@
 This is a Python client for the LogHog log management server (https://github.com/activefrequency/loghogd).
 It implements a drop-in LogHandler for the Python logging framework.
 
+Python's built-in logging using the FileHandler family does not prevent multiple processes from
+writing to the same log file (often over each other). This is a typical issue with Django running
+under apache2.
+
+LogHog solves this by having all the processes log to a central server. The LogHog server takes care
+of writing the messages one at a time, rotating and compressing files, deleting old log files, etc.
+
+You can think of LogHog as a very secure and user friendly syslog + logrotate in one package.
+
 ## Quickstart
 
 **Step 1**: Install the LogHog server (loghogd). If you are using Ubuntu, run the following:
@@ -51,6 +60,8 @@ And reload loghog:
     logger.setLevel(logging.DEBUG)
 
     logger.info('Hello world!')
+
+Start your app and look at /var/log/loghogd/my-first-app/ to see your application's log."
 
 For more extensive configuration, see the examples directory.
 
