@@ -12,7 +12,7 @@ from loghog import LoghogHandler
 def setup_logging():
     logger = logging.getLogger()
     
-    # In order to use this example, you must generate a client certificate.
+    # NOTE: In order to use this example, you must generate a client certificate.
     # Simply use the loghog-client-cert command on the machine that will 
     # run loghogd:
     #
@@ -27,7 +27,10 @@ def setup_logging():
         'cacert': '/etc/loghogd/certs/loghogd-ca.cert',
     }
 
-    handler = LoghogHandler('my-first-app', address=('localhost', 5577), ssl_info=ssl_info, print_debug=True)
+    # Specify an ssl_info dict, as well as a port value to enable SSL.
+    # Typically, port 5577 is used for SSL-protected connections.
+    # print_debug is enabled to help identify any issues.
+    handler = LoghogHandler('my-first-app', port=5577, ssl_info=ssl_info, print_debug=True)
 
     handler.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
     logger.addHandler(handler)

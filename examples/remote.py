@@ -12,7 +12,10 @@ from loghog import LoghogHandler
 def setup_logging():
     logger = logging.getLogger()
 
-    handler = LoghogHandler('my-first-app', address=('localhost', 5566))
+    # You can log messages to a remote server. Simply specify the address parameter.
+    # Don't forget to listen on the appropriate address on the server since
+    # by default it only listens on localhost.
+    handler = LoghogHandler('my-first-app', host='localhost', port=5566)
     
     handler.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
     logger.addHandler(handler)

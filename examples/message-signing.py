@@ -12,6 +12,10 @@ from loghog import LoghogHandler
 def setup_logging():
     logger = logging.getLogger()
 
+    # If the server-side specifies a secret, you must provide it here as well.
+    # If a secret is specified here, all messages are signed using HMAC.
+    # Any messages with invalid signatures will be ignored by the server.
+
     handler = LoghogHandler('app-with-secret', secret='my-big-secret')
 
     handler.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))

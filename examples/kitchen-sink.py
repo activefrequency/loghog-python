@@ -12,7 +12,7 @@ from loghog import LoghogHandler
 def setup_logging():
     logger = logging.getLogger()
 
-    # In order to use this example, you must generate a client certificate.
+    # NOTE: In order to use this example, you must generate a client certificate.
     # Simply use the loghog-client-cert command on the machine that will 
     # run loghogd:
     #
@@ -28,7 +28,8 @@ def setup_logging():
     }
 
     handler = LoghogHandler('kitchen-sink-app',
-        address=('localhost', 5577),# Default is ('localhost', 5566). Port 5577 is usually SSL enabled
+        host='localhost',           # Default is 'localhost'
+        port=5577,                  # Default is 5566. Port 5577 is usually SSL enabled
         stream=True,                # Default is True
         secret='my-big-secret',     # Specify this if the server expects it
         compression=True,           # Default is False

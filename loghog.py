@@ -20,13 +20,15 @@ class LoghogHandler(logging.handlers.SocketHandler):
 
     HMAC_DIGEST_ALGO = hashlib.md5
 
-    def __init__(self, app_name, address=('localhost', 5566), stream=True, secret=None, compression=False, hostname=None, ssl_info=None, print_debug=False):
+    def __init__(self, app_name, host='localhost', port=5566, stream=True, secret=None, compression=False, hostname=None, ssl_info=None, print_debug=False):
         '''Initializes the LoghogHandler instance.
 
         param app_name : basestring
             Name of your app. This should be listed in loghogd.conf
-        param address : 2-tuple
-            (ip_address, port) of the server
+        param host : basestring
+            A hostname or an IP address. IPv6 addresses should not have brackets around them
+        param port : int
+            Port number
         param stream : bool
             Whether to use a stream or a datagram protocol
         param secret : bytestring
@@ -44,7 +46,7 @@ class LoghogHandler(logging.handlers.SocketHandler):
         logging.Handler.__init__(self)
 
         self.app_name = app_name
-        self.address = address
+        self.address = (host, port)
         self.use_stream = stream
         self.secret = secret
         self.compression = compression 
