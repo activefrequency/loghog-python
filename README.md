@@ -6,7 +6,7 @@ It implements a drop-in LogHandler for the Python logging framework.
 
 ## Quickstart
 
-Step 1. Install the LogHog server (loghogd). If you are using Ubuntu, run the following:
+**Step 1**: Install the LogHog server (*loghogd*). If you are using Ubuntu, run the following:
 
     sudo add-apt-repository ppa:activefrequency/ppa
     sudo apt-get update
@@ -23,7 +23,7 @@ If you are using Debian, run the following:
     sudo apt-get update
     sudo apt-get install loghogd
 
-Step 2: List your application in the LogHog loggin facilities. Put the following in /etc/loghogd/facilities.conf:
+**Step 2**: List your application in the LogHog logging facilities. Put the following in */etc/loghogd/facilities.conf*:
 
     [my-first-app]
     rotate = 0 0 * * *
@@ -33,11 +33,11 @@ And reload loghog:
 
     sudo /etc/init.d/loghogd reload
 
-Step 2: Install LogHog Python Client (this codebase):
+**Step 3**: Install LogHog Python Client (this codebase):
 
     pip install loghog
 
-Step 3: Enable logging in your application. Add the following to your app startup:
+**Step 4**: Enable logging in your application. Add the following to your app startup:
 
     import logging
     from loghog import LoghogHandler
@@ -94,7 +94,7 @@ For configuring the LogHog server, see https://github.com/activefrequency/loghog
 
 ## License
 
-This code is released under the Apache 2 license. See LICENSE for more details.
+This code is released under the Apache 2 license. See *LICENSE* for more details.
 
 ## Contributing
 
