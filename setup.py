@@ -12,6 +12,7 @@ setup(
     author_email = 'info@activefrequency.com',
     url = 'https://github.com/activefrequency/loghog',
     license = 'Apache2',
+    test_suite = 'tests.tests_all',
     py_modules = ['loghog'],
     classifiers=[
         'Development Status :: 4 - Beta',
