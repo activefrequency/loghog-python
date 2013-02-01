@@ -11,6 +11,7 @@ setup(
     name = 'loghog',
     version = '3',
     description = 'LogHog python client',
+    author = 'Active Frequency, LLC',
     author_email = 'info@activefrequency.com',
     url = 'https://github.com/activefrequency/loghog',
     license = 'Apache2',
