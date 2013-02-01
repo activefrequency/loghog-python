@@ -35,6 +35,7 @@ def setup_logging():
         compression=True,           # Default is False
         hostname='example01',       # Default is determined automatiaclly
         ssl_info=ssl_info,          # Default is None for disabled SSL
+        max_buffer_size=1024,       # How many messages to enque if the server is down, before dropping the oldest ones
         print_debug=True            # Default is False. Prints connection errors to STDOUT
     )
 

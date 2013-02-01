@@ -1,7 +1,8 @@
 
 from __future__ import print_function
-import socket, hmac, hashlib, struct, zlib, ssl, random
+import socket, hmac, hashlib, struct, zlib, ssl, random, select
 import logging, logging.handlers
+from collections import deque
 
 __version__ = '1'
 
@@ -20,7 +21,7 @@ class LoghogHandler(logging.handlers.SocketHandler):
 
     HMAC_DIGEST_ALGO = hashlib.md5
 
-    def __init__(self, app_name, host='localhost', port=5566, stream=True, secret=None, compression=False, hostname=None, ssl_info=None, print_debug=False):
+    def __init__(self, app_name, host='localhost', port=5566, stream=True, secret=None, compression=False, hostname=None, ssl_info=None, max_buffer_size=1024, print_debug=False):
         '''Initializes the LoghogHandler instance.
 
         param app_name : basestring
@@ -38,6 +39,8 @@ class LoghogHandler(logging.handlers.SocketHandler):
         param ssl_info : dict
             A dictionary containing two keys: pemfile and cacert. These should be paths to the
             SSL certificates necessary to talk to the server
+        param max_buffer_size : positive int
+            How many messages to queue up if the server is down, before dropping the oldest ones.
         param print_debug : bool
             This argument controls whether errors are suppressed silently, or printed to stdout.
             Use this if you are using SSL to view connection errors.
@@ -52,6 +55,7 @@ class LoghogHandler(logging.handlers.SocketHandler):
         self.compression = compression 
         self.hostname = hostname
         self.compression = None
+        self.max_buffer_size = max_buffer_size
         self.print_debug = print_debug
 
         self.pemfile = None
@@ -71,6 +75,7 @@ class LoghogHandler(logging.handlers.SocketHandler):
         self.sock = None
         self.closeOnError = 0
         self.retryTime = None
+        self.buffer = deque()
         #
         # Exponential backoff parameters.
         #
@@ -142,9 +147,14 @@ class LoghogHandler(logging.handlers.SocketHandler):
     def emit(self, record):
         '''Encodes and sends the messge over the network.'''
 
-        self.send(self._encode(record))
+        if len(self.buffer) >= self.max_buffer_size:
+            x = self.buffer.popleft() # Drop the oldest message to make room
+            print('just dropped %r' % x)
 
-    def send(self, s):
+        self.buffer.append(self._encode(record))
+        self.send()
+
+    def send(self):
         '''Attempts to create a network connection and send the data.'''
 
         if self.sock is None:
@@ -154,10 +164,29 @@ class LoghogHandler(logging.handlers.SocketHandler):
             return
 
         try:
-            if self.use_stream:
-                self.sock.sendall(s)
-            else:
-                self.sock.sendto(s, self.address)
+            while self.buffer:
+                data = self.buffer.popleft()
+
+                # Detect if we can read and write to/from socket
+                r, w, _ = select.select([self.sock], [self.sock], [], 0.25)
+
+                # If select says we can't write, bail
+                if self.sock not in w:
+                    raise socket.error('Cannot write to socket.')
+
+                # Normally, the server does not write anything to us. However,
+                # if the server gracefully closed the socket, then we get a 
+                # zero byte sequence here. Reading zero bytes means the other
+                # side is down. Thus we can shut down now.
+                if self.sock in r:
+                    if not (self.sock.recv(1)):
+                        raise socket.error('Detected a closed socket.')
+
+                if self.use_stream:
+                    self.sock.sendall(data)
+                else:
+                    self.sock.sendto(data, self.address)
         except socket.error:
             self.close()
+            self.buffer.appendleft(data) # Add the log message back to the queue
 
