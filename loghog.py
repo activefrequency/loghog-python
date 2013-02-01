@@ -4,8 +4,6 @@ import socket, hmac, hashlib, struct, zlib, ssl, random, select
 import logging, logging.handlers
 from collections import deque
 
-__version__ = '3'
-
 try:
     import json
 except ImportError:
@@ -17,7 +15,7 @@ class LoghogHandler(logging.handlers.SocketHandler):
 
     _FLAGS_GZIP = 0x01
 
-    FORMAT_PROTO = '!LL %ds'
+    FORMAT_PROTO = '!LL {0}s'
 
     HMAC_DIGEST_ALGO = hashlib.md5
 
@@ -132,16 +130,16 @@ class LoghogHandler(logging.handlers.SocketHandler):
 
         if self.secret:
             hashable_fields = ['app_id', 'module', 'stamp', 'nsecs', 'body']
-            hashable = u''.join(unicode(data[field]) for field in hashable_fields).encode('utf-8')
-            data['signature'] = hmac.new(self.secret, hashable, self.HMAC_DIGEST_ALGO).hexdigest()
+            hashable = ''.join(str(data[field]) for field in hashable_fields).encode('utf-8')
+            data['signature'] = hmac.new(self.secret.encode('utf-8'), hashable, self.HMAC_DIGEST_ALGO).hexdigest()
 
-        payload = json.dumps(data)
+        payload = json.dumps(data).encode('utf-8')
 
         if self.compression:
             payload = zlib.compress(payload)
 
         size = len(payload)
-        return struct.pack(self.FORMAT_PROTO % size, size, self.flags, payload)
+        return struct.pack(self.FORMAT_PROTO.format(size), size, self.flags, payload)
 
     def emit(self, record):
         '''Encodes and sends the messge over the network.'''

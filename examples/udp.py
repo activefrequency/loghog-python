@@ -34,6 +34,6 @@ setup_logging()
 log = logging.getLogger()
 
 while True:
-    log.info(u"That is one hot jalapño!")
+    log.info("That is one hot jalapño!")
     time.sleep(1)
 

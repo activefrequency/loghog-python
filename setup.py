@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
+import sys
 from setuptools import setup
 
-from loghog import __version__ as VERSION
-
+extra = {}
+if sys.version_info >= (3,):
+    extra['use_2to3'] = True
 
 setup(
     name = 'loghog',
-    version = VERSION,
+    version = '3',
     description = 'LogHog python client',
     author_email = 'info@activefrequency.com',
     url = 'https://github.com/activefrequency/loghog',
@@ -24,4 +26,5 @@ setup(
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries',
     ],
+    **extra
 )

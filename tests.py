@@ -23,7 +23,7 @@ class LoghogClientTest(unittest.TestCase):
         '''Adapted from loghogd.processor.'''
 
         for field in self.REQUIRED_FIELDS:
-            self.assertTrue(field in msg, 'Invalid message: "{}" is not in the message.'.format(field))
+            self.assertTrue(field in msg, 'Invalid message: "{0}" is not in the message.'.format(field))
 
     def verify_signature(self, secret, msg):
         '''Adapted from loghogd.processor.'''
@@ -31,15 +31,15 @@ class LoghogClientTest(unittest.TestCase):
         if secret:
             self.assertTrue('signature' in msg, 'Security alert: message signature is required but not present')
 
-            hashable = u''.join(unicode(msg[field]) for field in self.HASHABLE_FIELDS).encode('utf-8')
-            signature = hmac.new(secret, hashable, self.HMAC_DIGEST_ALGO).hexdigest()
+            hashable = ''.join(str(msg[field]) for field in self.HASHABLE_FIELDS).encode('utf-8')
+            signature = hmac.new(secret.encode('utf-8'), hashable, self.HMAC_DIGEST_ALGO).hexdigest()
 
             self.assertEqual(signature, msg['signature'], "Message signature is invalid.")
 
     def parse_message(self, data):
         '''Adapted from loghogd.processor.'''
 
-        msg = json.loads(data)
+        msg = json.loads(data.decode('utf-8'))
 
         self.validate_msg(msg)
 
