@@ -4,7 +4,7 @@ import socket, hmac, hashlib, struct, zlib, ssl, random, select
 import logging, logging.handlers
 from collections import deque
 
-__version__ = '1'
+__version__ = '2'
 
 try:
     import json
