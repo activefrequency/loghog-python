@@ -4,7 +4,7 @@ import socket, hmac, hashlib, struct, zlib, ssl, random, select
 import logging, logging.handlers
 from collections import deque
 
-__version__ = '2'
+__version__ = '3'
 
 try:
     import json
@@ -54,7 +54,6 @@ class LoghogHandler(logging.handlers.SocketHandler):
         self.secret = secret
         self.compression = compression 
         self.hostname = hostname
-        self.compression = None
         self.max_buffer_size = max_buffer_size
         self.print_debug = print_debug
 
@@ -148,8 +147,7 @@ class LoghogHandler(logging.handlers.SocketHandler):
         '''Encodes and sends the messge over the network.'''
 
         if len(self.buffer) >= self.max_buffer_size:
-            x = self.buffer.popleft() # Drop the oldest message to make room
-            print('just dropped %r' % x)
+            self.buffer.popleft() # Drop the oldest message to make room
 
         self.buffer.append(self._encode(record))
         self.send()
