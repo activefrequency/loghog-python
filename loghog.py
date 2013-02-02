@@ -130,7 +130,7 @@ class LoghogHandler(logging.handlers.SocketHandler):
 
         if self.secret:
             hashable_fields = ['app_id', 'module', 'stamp', 'nsecs', 'body']
-            hashable = ''.join(str(data[field]) for field in hashable_fields).encode('utf-8')
+            hashable = u''.join(str(data[field]).decode('utf-8') for field in hashable_fields).encode('utf-8')
             data['signature'] = hmac.new(self.secret.encode('utf-8'), hashable, self.HMAC_DIGEST_ALGO).hexdigest()
 
         payload = json.dumps(data).encode('utf-8')

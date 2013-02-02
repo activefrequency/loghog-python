@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 '''
 This module contains unit test for the Python LogHog client.
 '''
@@ -17,7 +20,7 @@ class LoghogClientTest(unittest.TestCase):
     HMAC_DIGEST_ALGO = hashlib.md5
 
     def setUp(self):
-        self.rec = logging.LogRecord('web.requests', logging.INFO, os.path.abspath(__file__), 10, 'test message', tuple(), None)
+        self.rec = logging.LogRecord('web.requests', logging.INFO, os.path.abspath(__file__), 10, "That is one hot jalapño!", tuple(), None)
     
     def validate_msg(self, msg):
         '''Adapted from loghogd.processor.'''
@@ -31,7 +34,7 @@ class LoghogClientTest(unittest.TestCase):
         if secret:
             self.assertTrue('signature' in msg, 'Security alert: message signature is required but not present')
 
-            hashable = ''.join(str(msg[field]) for field in self.HASHABLE_FIELDS).encode('utf-8')
+            hashable = u''.join(unicode(msg[field]) for field in self.HASHABLE_FIELDS).encode('utf-8')
             signature = hmac.new(secret.encode('utf-8'), hashable, self.HMAC_DIGEST_ALGO).hexdigest()
 
             self.assertEqual(signature, msg['signature'], "Message signature is invalid.")
@@ -48,7 +51,7 @@ class LoghogClientTest(unittest.TestCase):
     def check_message_content(self, msg):
         self.assertEqual(msg['app_id'], 'test-app')
         self.assertEqual(msg['module'], 'web.requests')
-        self.assertEqual(msg['body'], 'test message')
+        self.assertEqual(msg['body'], u"That is one hot jalapño!")
 
     def unpack_payload(self, data):
         size, flags = struct.unpack(self.HEADER_FORMAT, data[:self.HEADER_SIZE])
