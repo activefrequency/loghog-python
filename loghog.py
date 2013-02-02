@@ -1,5 +1,5 @@
 
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import socket, hmac, hashlib, struct, zlib, ssl, random, select
 import logging, logging.handlers
 from collections import deque
@@ -130,7 +130,7 @@ class LoghogHandler(logging.handlers.SocketHandler):
 
         if self.secret:
             hashable_fields = ['app_id', 'module', 'stamp', 'nsecs', 'body']
-            hashable = u''.join(str(data[field]).decode('utf-8') for field in hashable_fields).encode('utf-8')
+            hashable = ''.join('{0}'.format(data[field]) for field in hashable_fields).encode('utf-8')
             data['signature'] = hmac.new(self.secret.encode('utf-8'), hashable, self.HMAC_DIGEST_ALGO).hexdigest()
 
         payload = json.dumps(data).encode('utf-8')
@@ -139,7 +139,7 @@ class LoghogHandler(logging.handlers.SocketHandler):
             payload = zlib.compress(payload)
 
         size = len(payload)
-        return struct.pack(self.FORMAT_PROTO.format(size), size, self.flags, payload)
+        return struct.pack(self.FORMAT_PROTO.format(size).encode('ascii'), size, self.flags, payload)
 
     def emit(self, record):
         '''Encodes and sends the messge over the network.'''
