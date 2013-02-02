@@ -9,7 +9,7 @@ if sys.version_info >= (3,):
 
 setup(
     name = 'loghog',
-    version = '4',
+    version = '5',
     description = 'LogHog python client',
     author = 'Active Frequency, LLC',
     author_email = 'info@activefrequency.com',
@@ -25,6 +25,7 @@ setup(
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries',
     ],
     **extra
