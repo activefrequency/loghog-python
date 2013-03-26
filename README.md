@@ -1,4 +1,3 @@
-
 # LogHog Python Client
 
 This is a Python client for the LogHog log management server (https://github.com/activefrequency/loghogd).
@@ -33,10 +32,13 @@ secure, and it stays out of your way.
     sudo apt-get update
     sudo apt-get install loghogd
 
+Note: if you are running an older (e.g.: 10.04) release of Ubuntu, you may need to first install
+the *python-software-properties* package to get the `add-apt-repository` command.
+
 If you are using Debian, run the following:
 
-    echo 'deb http://ppa.launchpad.net/activefrequency/ppa/ubuntu lucid main' | sudo tee -a /etc/apt/sources.list.d/99-loghogd
-    echo 'deb-src http://ppa.launchpad.net/activefrequency/ppa/ubuntu lucid main' | sudo tee -a /etc/apt/sources.list.d/99-loghogd
+    echo 'deb http://ppa.launchpad.net/activefrequency/ppa/ubuntu lucid main' | sudo tee -a /etc/apt/sources.list.d/99-loghogd.list
+    echo 'deb-src http://ppa.launchpad.net/activefrequency/ppa/ubuntu lucid main' | sudo tee -a /etc/apt/sources.list.d/99-loghogd.list
     
     gpg --keyserver hkp://keyserver.ubuntu.com/ --recv-keys F96CE604
     gpg -a --export F96CE604 | sudo apt-key add -
