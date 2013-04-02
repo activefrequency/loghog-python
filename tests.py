@@ -7,8 +7,9 @@ from __future__ import unicode_literals
 This module contains unit test for the Python LogHog client.
 '''
 
-import unittest, logging, os, struct, zlib, hashlib, hmac, json
+import unittest, logging, os, struct, zlib, hashlib, hmac, json, tempfile
 from loghog import LoghogHandler
+from pqueue import PersistentQueue
 
 class LoghogClientTest(unittest.TestCase):
 
@@ -89,7 +90,205 @@ class LoghogClientTest(unittest.TestCase):
 
         self.verify_signature('qqq123', msg)
 
-tests_all = unittest.TestLoader().loadTestsFromTestCase(LoghogClientTest)
+class LoghogQueueTest(unittest.TestCase):
+    
+    def setUp(self, record_count=100):
+        filename = os.path.join(tempfile.gettempdir(), 'loghog-tests-{0}.data'.format(os.getpid()))
+        self.queue = PersistentQueue(filename, record_count, 1024)
+        self.queue.lock()
+
+    def tearDown(self):
+        self.queue.unlock()
+        self.queue.close()
+        os.unlink(self.queue.filename)
+
+    def test_put_get_1(self):
+        self.queue.put(b'aaa')
+
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'aaa')
+        self.queue.task_complete(rec_id)
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(rec_id, None)
+
+    def test_put_get_2(self):
+        alpha = [chr(x) for x in range(ord('a'), ord('z'))]
+
+        for a in alpha:
+            self.queue.put(a)
+
+        while True:
+            rec_id, record = self.queue.get()
+            if rec_id is None:
+                break
+
+            self.assertTrue(rec_id != None)
+            self.queue.task_complete(rec_id)
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(rec_id, None)
+    
+    def test_put_get_3(self):
+        alpha = [chr(x) for x in range(ord('a'), ord('z'))]
+
+        for a in alpha:
+            self.queue.put(a)
+            
+            rec_id, record = self.queue.get()
+            self.assertTrue(rec_id != None)
+            self.assertEqual(record, a)
+            self.queue.task_complete(rec_id)
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(rec_id, None)
+
+    def test_open_close_1(self):
+        self.queue.put(b'a')
+        self.queue.put(b'b')
+        self.queue.put(b'c')
+        
+        self.queue.close()
+        self.queue.open()
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'a')
+        self.queue.task_complete(rec_id)
+
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'b')
+        self.queue.task_complete(rec_id)
+
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'c')
+        self.queue.task_complete(rec_id)
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(rec_id, None)
+    
+    def test_open_close_2(self):
+
+        for i in xrange(10):
+            self.queue.put(b'a')
+            self.queue.put(b'b')
+            self.queue.put(b'c')
+            
+            self.queue.close()
+            self.queue.open()
+            
+            rec_id, record = self.queue.get()
+            self.assertEqual(record, b'a')
+            self.queue.task_complete(rec_id)
+
+            rec_id, record = self.queue.get()
+            self.assertEqual(record, b'b')
+            self.queue.task_complete(rec_id)
+
+            rec_id, record = self.queue.get()
+            self.assertEqual(record, b'c')
+            self.queue.task_complete(rec_id)
+            
+            rec_id, record = self.queue.get()
+            self.assertEqual(rec_id, None)
+
+    def test_overflow_1(self):
+        self.tearDown()
+        self.setUp(3)
+        
+        self.queue.put(b'a')
+        self.queue.put(b'b')
+        self.queue.put(b'c')
+        self.queue.put(b'd')
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'b')
+        self.queue.task_complete(rec_id)
+
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'c')
+        self.queue.task_complete(rec_id)
+
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'd')
+        self.queue.task_complete(rec_id)
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(rec_id, None)
+    
+    def test_overflow_2(self):
+        self.tearDown()
+        self.setUp(3)
+        
+        self.queue.put(b'a')
+        self.queue.put(b'b')
+        self.queue.put(b'c')
+
+        self.queue.put(b'd')
+        self.queue.put(b'e')
+        self.queue.put(b'f')
+
+        self.queue.put(b'g')
+        self.queue.put(b'h')
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'f')
+        self.queue.task_complete(rec_id)
+
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'g')
+        self.queue.task_complete(rec_id)
+
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'h')
+        self.queue.task_complete(rec_id)
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(rec_id, None)
+
+    def test_resize_1(self):
+        self.queue.put(b'a')
+        self.queue.put(b'b')
+        self.queue.put(b'c')
+        self.queue.put(b'd')
+        
+        self.queue.resize(3, 1024)
+            
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'b')
+        self.queue.task_complete(rec_id)
+
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'c')
+        self.queue.task_complete(rec_id)
+
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'd')
+        self.queue.task_complete(rec_id)
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(rec_id, None)
+        
+    def test_resize_2(self):
+        self.queue.put(b'a' * 100)
+        self.queue.put(b'b' * 100)
+        self.queue.put(b'c')
+        self.queue.put(b'd')
+        
+        self.queue.resize(3, 10)
+            
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'c')
+        self.queue.task_complete(rec_id)
+
+        rec_id, record = self.queue.get()
+        self.assertEqual(record, b'd')
+        self.queue.task_complete(rec_id)
+        
+        rec_id, record = self.queue.get()
+        self.assertEqual(rec_id, None)
+
+#tests_all = unittest.TestLoader().loadTestsFromTestCase(LoghogClientTest)
+tests_all = unittest.TestLoader().loadTestsFromTestCase(LoghogQueueTest)
 
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(tests_all)
