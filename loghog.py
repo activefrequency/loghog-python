@@ -183,6 +183,7 @@ class LoghogHandler(logging.handlers.SocketHandler):
                 else:
                     self.sock.sendto(data, self.address)
         except socket.error:
-            self.close()
+            self.sock.close()
+            self.sock = None
             self.buffer.appendleft(data) # Add the log message back to the queue
 
