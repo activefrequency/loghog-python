@@ -9,7 +9,7 @@ if sys.version_info >= (3,):
 
 setup(
     name = 'loghog',
-    version = '0.6',
+    version = '0.7',
     description = 'LogHog python client',
     author = 'Active Frequency, LLC',
     author_email = 'info@activefrequency.com',
